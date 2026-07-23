@@ -2,7 +2,7 @@
 
 [English](README.md) | [简体中文](README.zh-CN.md)
 
-[Official website](https://fantread-ai.yamaguchi091102.chatgpt.site) ·
+[Official website](https://7757.github.io/FanTread/) ·
 [npm](https://www.npmjs.com/package/fantread) ·
 [GitHub](https://github.com/7757/FanTread)
 

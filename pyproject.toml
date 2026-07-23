@@ -32,7 +32,7 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://fantread-ai.yamaguchi091102.chatgpt.site"
+Homepage = "https://7757.github.io/FanTread/"
 Repository = "https://github.com/7757/FanTread.git"
 Issues = "https://github.com/7757/FanTread/issues"
 

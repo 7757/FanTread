@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState } from "react";
 
 type Locale = "zh" | "en";
@@ -247,19 +248,31 @@ export default function Home() {
   const t = copy[locale];
 
   useEffect(() => {
+    let preferredLocale: Locale | null = null;
+
     try {
       const saved = window.localStorage.getItem("fantread-locale");
       if (saved === "zh" || saved === "en") {
-        setLocale(saved);
-        return;
+        preferredLocale = saved;
       }
     } catch {
       // Local storage is optional.
     }
 
-    if (!window.navigator.language.toLowerCase().startsWith("zh")) {
-      setLocale("en");
+    if (
+      preferredLocale === null &&
+      !window.navigator.language.toLowerCase().startsWith("zh")
+    ) {
+      preferredLocale = "en";
     }
+
+    if (preferredLocale === null) return;
+
+    const updateLocale = window.setTimeout(() => {
+      setLocale(preferredLocale);
+    }, 0);
+
+    return () => window.clearTimeout(updateLocale);
   }, []);
 
   const switchLocale = () => {
@@ -546,7 +559,7 @@ export default function Home() {
         <section className="author section-wrap" id="author" aria-labelledby="author-name">
           <div className="author-card">
             <div className="author-avatar-wrap">
-              <img
+              <Image
                 className="author-avatar"
                 src="https://avatars.githubusercontent.com/u/48285391?v=4"
                 alt="musk on GitHub"

@@ -13,9 +13,10 @@
 # testing
 /coverage
 
-# next.js
+# next.js and static export
 /.next/
 /.vinext/
+/.wrangler/
 /out/
 
 # misc
@@ -37,6 +38,5 @@ yarn-error.log*
 # typescript
 next-env.d.ts
 /dist/
-/.wrangler/
 /outputs/
 /work/
