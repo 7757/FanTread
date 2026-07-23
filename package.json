@@ -1,0 +1,47 @@
+{
+  "name": "fantread",
+  "version": "0.5.0",
+  "description": "A friendly DeepSeek-powered terminal reader for links, articles, and posts",
+  "license": "MIT",
+  "author": "FanTread contributors",
+  "homepage": "https://github.com/7757/FanTread#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/7757/FanTread.git"
+  },
+  "bugs": {
+    "url": "https://github.com/7757/FanTread/issues"
+  },
+  "keywords": [
+    "ai",
+    "cli",
+    "deepseek",
+    "reader",
+    "summarizer",
+    "wechat"
+  ],
+  "bin": {
+    "fan": "bin/fan.js",
+    "fantread": "bin/fan.js"
+  },
+  "files": [
+    "bin/",
+    "scripts/",
+    "src/fantread/*.py",
+    "pyproject.toml",
+    "README.md",
+    "README.zh-CN.md",
+    "LICENSE",
+    ".env.example"
+  ],
+  "scripts": {
+    "test": "node --test npm-tests/bootstrap.test.js",
+    "prepack": "npm test"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
