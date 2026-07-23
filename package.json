@@ -3,8 +3,8 @@
   "version": "0.5.0",
   "description": "A friendly DeepSeek-powered terminal reader for links, articles, and posts",
   "license": "MIT",
-  "author": "FanTread contributors",
-  "homepage": "https://github.com/7757/FanTread#readme",
+  "author": "musk",
+  "homepage": "https://fantread-ai.yamaguchi091102.chatgpt.site",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/7757/FanTread.git"

@@ -13,4 +13,6 @@ __pycache__/
 htmlcov/
 dist/
 build/
+!website/build/
+!website/build/sites-vite-plugin.ts
 *.egg-info/

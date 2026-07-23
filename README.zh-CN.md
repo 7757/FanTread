@@ -2,6 +2,10 @@
 
 [English](README.md) | [简体中文](README.zh-CN.md)
 
+[官方网站](https://fantread-ai.yamaguchi091102.chatgpt.site) ·
+[npm](https://www.npmjs.com/package/fantread) ·
+[GitHub](https://github.com/7757/FanTread)
+
 [![npm](https://img.shields.io/npm/v/fantread?color=18a999)](https://www.npmjs.com/package/fantread)
 [![CI](https://github.com/7757/FanTread/actions/workflows/ci.yml/badge.svg)](https://github.com/7757/FanTread/actions/workflows/ci.yml)
 [![License](https://img.shields.io/github/license/7757/FanTread)](LICENSE)

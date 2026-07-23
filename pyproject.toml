@@ -9,7 +9,7 @@ description = "A friendly DeepSeek-powered terminal reader that extracts and org
 readme = "README.md"
 requires-python = ">=3.11"
 license = { file = "LICENSE" }
-authors = [{ name = "FanTread contributors" }]
+authors = [{ name = "musk" }]
 keywords = ["cli", "deepseek", "summarizer", "wechat", "article"]
 classifiers = [
   "Development Status :: 3 - Alpha",
@@ -32,7 +32,7 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/7757/FanTread"
+Homepage = "https://fantread-ai.yamaguchi091102.chatgpt.site"
 Repository = "https://github.com/7757/FanTread.git"
 Issues = "https://github.com/7757/FanTread/issues"
 
