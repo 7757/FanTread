@@ -35,9 +35,9 @@ class AppConfig:
 
 
 def fresh_run_enabled() -> bool:
-    """Default to stateless runs while the application is under development."""
-    value = os.getenv(ENV_FRESH_RUN, "1").strip().lower()
-    return value not in {"0", "false", "no", "off"}
+    """Enable stateless development runs only when explicitly requested."""
+    value = os.getenv(ENV_FRESH_RUN, "0").strip().lower()
+    return value in {"1", "true", "yes", "on"}
 
 
 def config_dir() -> Path:

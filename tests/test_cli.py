@@ -111,6 +111,7 @@ def test_fresh_interactive_run_fetches_before_model_and_key(
             model=self.client.model,
         )
 
+    monkeypatch.setenv("FANTREAD_FRESH", "1")
     monkeypatch.setattr("fantread.cli.sys.stdin", InteractiveInput())
     monkeypatch.setattr(
         "fantread.cli.ArticleExtractor.fetch_and_extract",
@@ -134,6 +135,93 @@ def test_fresh_interactive_run_fetches_before_model_and_key(
     )
 
     assert events == ["fetch", "model", "key"]
+
+
+def test_first_persistent_run_saves_model_and_skips_later_picker(
+    monkeypatch,
+    tmp_path,
+) -> None:
+    events: list[str] = []
+    article = Article(
+        url="https://example.com",
+        final_url="https://example.com",
+        title="测试文章",
+        text="有效正文。" * 40,
+    )
+
+    class InteractiveInput:
+        @staticmethod
+        def isatty() -> bool:
+            return True
+
+    def fetch(self, url):
+        events.append("fetch")
+        return article
+
+    def choose_model(*, default):
+        events.append("model")
+        return "deepseek-v4-pro"
+
+    def ensure_key(*, fresh_run):
+        events.append("key")
+        assert fresh_run is False
+        return "stored-key"
+
+    def summarize(self, article, **kwargs):
+        return ReadResult(
+            article=article,
+            content="# 结果\n\n正文",
+            model=self.client.model,
+        )
+
+    monkeypatch.delenv("FANTREAD_FRESH", raising=False)
+    monkeypatch.setenv("FANTREAD_CONFIG_DIR", str(tmp_path))
+    monkeypatch.setattr("fantread.cli.sys.stdin", InteractiveInput())
+    monkeypatch.setattr("fantread.cli.ArticleExtractor.fetch_and_extract", fetch)
+    monkeypatch.setattr("fantread.cli._choose_model", choose_model)
+    monkeypatch.setattr("fantread.cli._ensure_api_key", ensure_key)
+    monkeypatch.setattr("fantread.cli.Summarizer.run", summarize)
+
+    read_command(
+        url="https://example.com",
+        prompt=None,
+        output_format=None,
+        output=None,
+        model=None,
+        thinking=None,
+        language=None,
+        stream=False,
+        timeout=25.0,
+        force=False,
+    )
+
+    assert events == ["fetch", "model", "key"]
+    assert json.loads((tmp_path / "config.json").read_text())["model"] == (
+        "deepseek-v4-pro"
+    )
+
+    events.clear()
+    read_command(
+        url="https://example.com",
+        prompt=None,
+        output_format=None,
+        output=None,
+        model=None,
+        thinking=None,
+        language=None,
+        stream=False,
+        timeout=25.0,
+        force=False,
+    )
+
+    assert events == ["fetch", "key"]
+
+
+def test_persistent_run_reads_key_without_prompt(monkeypatch) -> None:
+    monkeypatch.delenv("DEEPSEEK_API_KEY", raising=False)
+    monkeypatch.setattr("fantread.cli.resolve_api_key", lambda: "stored-key")
+
+    assert _ensure_api_key(fresh_run=False) == "stored-key"
 
 
 def test_interactive_url_prompt_retries_invalid_input(monkeypatch) -> None:
@@ -218,3 +306,35 @@ def test_setup_is_non_persistent_in_fresh_mode(monkeypatch, tmp_path) -> None:
     assert result.exit_code == 0
     assert "不读取或保存配置" in result.stdout
     assert not (tmp_path / "config.json").exists()
+
+
+def test_setup_persists_model_and_key_by_default(monkeypatch, tmp_path) -> None:
+    stored_keys: list[str] = []
+    confirmations = iter([True, True])
+
+    monkeypatch.delenv("FANTREAD_FRESH", raising=False)
+    monkeypatch.setenv("FANTREAD_CONFIG_DIR", str(tmp_path))
+    monkeypatch.setattr(
+        "fantread.cli._choose_model",
+        lambda *, default: "deepseek-v4-pro",
+    )
+    monkeypatch.setattr("fantread.cli.resolve_api_key", lambda: None)
+    monkeypatch.setattr("fantread.cli.api_key_source", lambda: None)
+    monkeypatch.setattr(
+        "fantread.cli.Confirm.ask",
+        lambda *args, **kwargs: next(confirmations),
+    )
+    monkeypatch.setattr(
+        "fantread.cli.Prompt.ask",
+        lambda *args, **kwargs: "test-key",
+    )
+    monkeypatch.setattr("fantread.cli.store_api_key", stored_keys.append)
+
+    result = CliRunner().invoke(app, ["setup", "--no-check"])
+
+    assert result.exit_code == 0
+    assert json.loads((tmp_path / "config.json").read_text())["model"] == (
+        "deepseek-v4-pro"
+    )
+    assert stored_keys == ["test-key"]
+    assert "设置完成" in result.stdout

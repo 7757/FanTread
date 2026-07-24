@@ -31,15 +31,18 @@ def test_config_file_never_contains_api_key(monkeypatch, tmp_path) -> None:
     assert load_config().model == "deepseek-v4-pro"
 
 
-def test_fresh_run_is_the_development_default(monkeypatch) -> None:
+def test_persistent_mode_is_the_default(monkeypatch) -> None:
     monkeypatch.delenv("FANTREAD_FRESH", raising=False)
-    assert fresh_run_enabled() is True
-
-    monkeypatch.setenv("FANTREAD_FRESH", "0")
     assert fresh_run_enabled() is False
 
 
-@pytest.mark.parametrize("value", ["0", "false", "NO", "off"])
+@pytest.mark.parametrize("value", ["1", "true", "YES", "on"])
+def test_fresh_run_requires_explicit_true_value(monkeypatch, value) -> None:
+    monkeypatch.setenv("FANTREAD_FRESH", value)
+    assert fresh_run_enabled() is True
+
+
+@pytest.mark.parametrize("value", ["0", "false", "NO", "off", "", "unexpected"])
 def test_fresh_run_false_values(monkeypatch, value) -> None:
     monkeypatch.setenv("FANTREAD_FRESH", value)
     assert fresh_run_enabled() is False

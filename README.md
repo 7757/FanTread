@@ -17,10 +17,10 @@ There are no summary modes to memorize. FanTread decides whether a page is a
 news story, long-form article, tutorial, opinion piece, or discussion post, then
 adapts the information density and layout automatically.
 
-> [!IMPORTANT]
-> FanTread is currently in alpha. The default configuration intentionally starts
-> a fresh session on every interactive run so the onboarding flow is easy to
-> test.
+> [!NOTE]
+> On the first run, FanTread asks for a default model and a masked API key.
+> The model is saved locally, and the key is stored in the operating system
+> keyring only with the user's permission. Later runs reuse both automatically.
 
 ## Highlights
 
@@ -116,14 +116,17 @@ Launch the interactive guide:
 fan
 ```
 
-The guide asks for:
+On the first run, the guide asks for:
 
 ```text
 Link
 Optional instruction
-DeepSeek model
-Temporary API key (masked and not saved)
+Default DeepSeek model (saved locally)
+DeepSeek API key (masked, with an option to store it securely)
 ```
+
+Later runs only ask for the link and optional instruction. Use `fan setup` to
+change the saved model or API key.
 
 Or pass a link directly:
 
@@ -212,8 +215,15 @@ for current availability and pricing.
 
 ## Fresh development sessions
 
-Fresh mode is enabled by default while FanTread is under development. Every
-interactive run:
+Normal persistent use is the default. Developers can explicitly enable a fresh,
+stateless run when testing first-use onboarding:
+
+```bash
+export FANTREAD_FRESH=1
+fan
+```
+
+While fresh mode is enabled, every interactive run:
 
 - ignores saved FanTread configuration
 - ignores keys stored in the system keyring
@@ -221,7 +231,8 @@ interactive run:
 - asks for a temporary masked API key again
 - keeps the key only in process memory
 
-For non-interactive automation, provide a key only for the current environment:
+For non-interactive automation in fresh mode, provide a key only for the current
+environment:
 
 ```bash
 export DEEPSEEK_API_KEY="your-key"
@@ -229,18 +240,16 @@ fan "https://example.com/article" --format json
 ```
 
 Interactive fresh runs still prompt for a key even if that environment variable
-exists.
-
-To enable persistent production-style configuration later:
+exists. Return to normal persistent use with:
 
 ```bash
-export FANTREAD_FRESH=0
+unset FANTREAD_FRESH
 fan setup
 ```
 
-`fan setup` lets the user choose a default model and optionally store the API key
-in the operating system keyring. The key is never written to FanTread's JSON
-configuration file.
+`fan setup` lets the user change the default model and optionally replace the API
+key stored in the operating system keyring. The key is never written to
+FanTread's JSON configuration file.
 
 ## Privacy and security
 
@@ -248,8 +257,8 @@ FanTread downloads and cleans the page locally, then sends the cleaned text and
 the optional user instruction to DeepSeek to generate the result.
 
 - API key input is masked.
-- Fresh interactive sessions do not persist the key.
-- Persistent mode uses the operating system keyring when the user opts in.
+- Normal mode uses the operating system keyring only when the user opts in.
+- Explicit fresh development sessions do not persist the key.
 - Keys are not written to project files or exported results.
 - Page content is delimited as source material in the model prompt to reduce
   prompt-injection risk.

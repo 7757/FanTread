@@ -117,6 +117,7 @@ def read_command(
     try:
         fresh_run = fresh_run_enabled()
         choose_model_interactively = False
+        persistent_config: AppConfig | None = None
         if fresh_run:
             defaults = AppConfig()
             selected_format = _parse_format(
@@ -128,12 +129,20 @@ def read_command(
             selected_language = language or "auto"
             selected_base_url = os.getenv(ENV_BASE_URL, defaults.base_url)
         else:
-            config = load_config()
-            selected_format = _parse_format(output_format or config.output_format)
-            selected_model = model or config.model
-            selected_thinking = config.thinking if thinking is None else thinking
-            selected_language = language or config.language
-            selected_base_url = config.base_url
+            first_run = not config_file().exists()
+            persistent_config = load_config()
+            selected_format = _parse_format(
+                output_format or persistent_config.output_format
+            )
+            selected_model = model or persistent_config.model
+            selected_thinking = (
+                persistent_config.thinking if thinking is None else thinking
+            )
+            selected_language = language or persistent_config.language
+            selected_base_url = persistent_config.base_url
+            choose_model_interactively = (
+                first_run and model is None and sys.stdin.isatty()
+            )
         if selected_language not in {"auto", "zh", "en"}:
             raise ValueError("--language 只能是 auto、zh 或 en")
         user_prompt = prepare_user_prompt(prompt)
@@ -144,6 +153,10 @@ def read_command(
 
         if choose_model_interactively:
             selected_model = _choose_model(default=selected_model)
+            if persistent_config is not None:
+                persistent_config.model = selected_model
+                save_config(persistent_config)
+                err_console.print("[green]✓[/green] 默认模型已保存")
         api_key = _ensure_api_key(fresh_run=fresh_run)
 
         live_stream: _LiveStream | None = None
@@ -240,7 +253,7 @@ def _prompt_for_url() -> str:
             err_console.print(f"[red]✗[/red] {exc}")
 
 
-@app.command("setup", help="生产模式下配置默认模型和 API Key。")
+@app.command("setup", help="配置默认模型和 API Key。")
 def setup_command(
     check: Annotated[
         bool,
